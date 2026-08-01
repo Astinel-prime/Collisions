@@ -1,0 +1,59 @@
+1. Project Name / Output Binary Name
+
+PROJECT_NAME = game
+
+2. Source Files
+
+SRC = main.cpp
+
+3. Detect Operating System
+
+ifeq ($(OS),Windows_NT)
+# --- WINDOWS SETTINGS ---
+TARGET_OS = WINDOWS
+CXX = g++
+RM = del /q /f
+EXT = .exe
+
+# Standard MinGW compiler paths for Raylib
+CFLAGS = -O2 -Wall -std=c++17
+LIBS = -lraylib -lopengl32 -lgdi32 -lwinmm
+
+
+else
+# --- MAC & LINUX SETTINGS ---
+UNAME_S := $(shell uname -s)
+EXT =
+RM = rm -f
+
+ifeq ($(UNAME_S),Darwin)
+    # --- MACOS SETTINGS ---
+    TARGET_OS = MACOS
+    # macOS native compiler is clang++. 
+    # Include both Apple Silicon (/opt/homebrew) and Intel (/usr/local) paths.
+    CXX = clang++
+    CFLAGS = -O2 -Wall -std=c++17 -I/opt/homebrew/include -I/usr/local/include
+    LIBS = -L/opt/homebrew/lib -L/usr/local/lib -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo -framework AppKit
+else
+    # --- LINUX SETTINGS ---
+    TARGET_OS = LINUX
+    CXX = g++
+    CFLAGS = -O2 -Wall -std=c++17
+    LIBS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+endif
+
+
+endif
+
+4. Target Rules
+
+all: $(PROJECT_NAME)
+
+$(PROJECT_NAME):$(SRC)
+@echo "Detecting OS Architecture... Found: $(TARGET_OS)"
+$(CXX)$(SRC) -o $(PROJECT_NAME)$(EXT) $(CFLAGS)$(LIBS)
+@echo "Build Successful!"
+
+clean:
+-$(RM) $(PROJECT_NAME)$(EXT)
+@echo "Cleanup Complete!"
