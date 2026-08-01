@@ -1,7 +1,12 @@
 #include<iostream>
 #include<raylib.h>
 #include<cmath>
+#include<random>
 
+
+
+#define Grass (Color) {76,175,80,255}
+#define Sky (Color) {100, 149, 237,255}
 
 
 using namespace std;
@@ -32,7 +37,7 @@ class Ball{
     int radius;
 
     void Draw(){
-        DrawCircle(x,y,radius,YELLOW);
+        DrawCircle(x,y,radius,WHITE);
     }
     
 
@@ -62,6 +67,7 @@ class Ball{
 
 };
 Ball ball;
+vector<Ball> b;
 
 int main(){
     cout<<"Start..."<<endl;
@@ -70,14 +76,16 @@ int main(){
 
     InitWindow(screen_width,screen_height,"Collision Simulation");
     SetTargetFPS(60);
-
+   
+  
     ball.x=500;
     ball.y=500;
     ball.radius=20;
-    ball.speed_x=10;
-    ball.speed_y=0;
+    ball.speed_x=7;
+    ball.speed_y=-5;
     Rectangle r={500,500+250*root,500,500};
     Vector2 v={0,0};
+    Rectangle r1={500,500+300*root,600,600};
     
     l[0].line_x = 500-250*root;
     l[0].line_y = 500;
@@ -100,7 +108,7 @@ int main(){
     l[3].normal_y=-1/root;
 
     
-    
+    int t=0;
 
     while(WindowShouldClose()==false){
         BeginDrawing();
@@ -108,9 +116,29 @@ int main(){
         
         ball.Update();
 
-        ClearBackground(BLACK);
-        DrawRectanglePro(r,v , 225, DARKGREEN);
+        for(int i=0;i<b.size();i++){
+            b[i].Update();
+        }
+        ClearBackground(Grass);
+        DrawRectanglePro(r1,v,225,WHITE);
+        DrawRectanglePro(r,v , 225, Sky);
         ball.Draw();
+        t++;
+        if(t==120){
+            t=0;
+            Ball balls;
+            balls.x=500;
+            balls.y=500-250;
+            balls.radius=20;
+            balls.speed_x=GetRandomValue(3,8);
+            balls.speed_y=GetRandomValue(3,8);
+            b.push_back(balls);
+
+        }
+        for(int i=0;i<b.size();i++){
+            b[i].Draw();
+        }
+        
 
         EndDrawing();
     }
