@@ -69,11 +69,38 @@ class Ball{
     float speed_x=0,speed_y=0;
     int radius;
 
+    float speed_normal(float speed_x,float speed_y,float normal_x,float normal_y){
+        return speed_x*normal_x+speed_y*normal_y;
+    }
+    float speed_tangent(float speed_x,float speed_y,float normal_x,float normal_y){
+        return speed_x*normal_y-speed_y*normal_x;
+    }
+
     void Draw(){
         DrawCircle(x,y,radius,WHITE);
     }
     
+    void check_collision(float b_radius,float &b_x,float &b_y,float &b_speed_x,float &b_speed_y){
+        if(b_x==x&&b_y==y) return;
+        float dx=b_x-x;
+        float dy=b_y-y;
+        float dist=dx*dx+dy*dy;
+        float normal_x=dx/dist, normal_y=dy/dist;
 
+        float sn=speed_normal(speed_x,speed_y,normal_x,normal_y);
+        float sn1=speed_normal(b_speed_x,b_speed_y,normal_x,normal_y);
+        float st=speed_tangent(speed_x,speed_y,normal_x,normal_y);
+        float st1=speed_tangent(b_speed_x,b_speed_y,normal_x,normal_y);
+
+        if(dist<=radius+b_radius){
+            b_x=x+normal_x*(radius+b_radius);
+            b_y=y+normal_y*(radius+b_radius);
+            speed_x=sn1*normal_x+st*normal_y;
+            speed_y=sn1*normal_y-st*normal_x;
+            b_speed_x=sn*normal_x+st1*normal_y;
+            b_speed_y=sn*normal_y-st1*normal_x;
+        }
+    }
     void Update(){
         
     for(int i=0;i<4;i++){
@@ -116,7 +143,8 @@ class Ball{
         }
         }
     }
-    
+
+
     
     
         
@@ -124,6 +152,7 @@ class Ball{
         y+=speed_y;
 
     }
+    
 
 };
 Ball ball;
@@ -142,11 +171,11 @@ int main(){
   
     ball.x=500;
     ball.y=500;
-    ball.radius=10;
+    ball.radius=20;
     ball.speed_x=7;
     ball.speed_y=-5;
     Rectangle r={500,500+250*root,500,500};
-    Vector2 v={0,0};
+    Vector2 v={0,0}; 
     Rectangle r1={500,500+300*root,600,600};
     
     l[0].line_x = 500-250*root;
@@ -227,26 +256,21 @@ int main(){
 
         for(int i=0;i<b.size();i++){
             b[i].Update();
+            b[i].check_collision(ball.radius,ball.x,ball.y,ball.speed_x,ball.speed_y);
+            for(int j=i+1;j<b.size();j++){
+                b[i].check_collision(b[j].radius,b[j].x,b[j].y,b[j].speed_x,b[j].speed_y);
+            }
         }
         ClearBackground(Grass);
         DrawRectanglePro(r1,v,225,WHITE);
         DrawRectanglePro(r,v , 225, Sky);
  
         
-        
-        for(int i=0;i<9;i++){
-            vector<Vector2> parts;
-            parts.push_back(points[i]);
-            parts.push_back(points1[i]);
-            parts.push_back(points[i+1]);
-            DrawTriangleStrip(parts.data(),parts.size(),WHITE);
-          
-            parts.clear();
-            parts.push_back(points[i]);
-            parts.push_back(points1[i]);
-            parts.push_back(points[i+1]);
-            DrawTriangleStrip(parts.data(),parts.size(),WHITE);
+        for(int i = 0; i < 9; i++) {
+            Vector2 parts[3] = {points[i], points1[i], points[i+1]};
+            DrawTriangleStrip(parts, 3, WHITE);
         }
+        
         
   
         
@@ -258,8 +282,8 @@ int main(){
             balls.x=500;
             balls.y=500-250;
             balls.radius=10;
-            balls.speed_x=GetRandomValue(3,4);
-            balls.speed_y=GetRandomValue(3,4);
+            balls.speed_x=GetRandomValue(3,7);
+            balls.speed_y=GetRandomValue(2,6);
             b.push_back(balls);
 
         }
